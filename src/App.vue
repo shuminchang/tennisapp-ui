@@ -1,15 +1,24 @@
 <template>
   <div id="app">
-    <AtpPlayerList />
+    <router-view
+      :baseURL="baseURL"
+      >
+    </router-view>
   </div>
 </template>
 
 <script>
-import AtpPlayerList from "./views/AtpPlayerList.vue";
-
 export default {
   components: {
-    AtpPlayerList,
   },
+  data() {
+    return {
+      baseURL: "http://localhost:8080/",
+    }
+  },
+  methods: {
+  },
+  mounted() {
+  }
 };
 </script>
