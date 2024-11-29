@@ -1,30 +1,35 @@
 <template>
-  <div class="col-6">
+  <div class="col-4">
     <Pie v-if="chartData" :data="chartData" :options="options" />
   </div>
-  <div class="col-6">
+  <div class="col-4">
     <Scatter v-if="scatterData" :data="scatterData" :options="scatterOptions" />
+  </div>
+  <div class="col-4">
+    <Bar v-if="barChartData" :data="barChartData" :options="barChartOptions" />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale, PointElement, LineElement } from 'chart.js'
-import { Pie, Scatter } from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale, PointElement, LineElement, CategoryScale, BarElement } from 'chart.js'
+import { Pie, Scatter, Bar } from 'vue-chartjs'
 
-ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, PointElement, LineElement)
+ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, PointElement, LineElement, CategoryScale, BarElement)
 
 export default {
   name: 'PlayerChart',
   components: {
     Pie,
-    Scatter
+    Scatter,
+    Bar
   },
   props : [ "baseURL"],
   data() {
     return {
       chartData: null,
       scatterData: null,
+      barChartData: null,
       options: {
         responsive: true,
         maintainAspectRatio: false
@@ -40,12 +45,26 @@ export default {
             title: { display: true, text: 'Age' }
           }
         }
-      }
+      },
+      barChartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'category', // Explicitly define the x-axis as a category scale
+            title: { display: true, text: 'Height Range (cm)' }
+          },
+          y: {
+            title: { display: true, text: 'Number of Players' }
+          }
+        }
+      },
     }
   },
   mounted() {
     this.fetchChartData()
     this.fetchScatterData()
+    this.fetchHeightDistribution()
   },
   methods: {
     async fetchChartData() {
@@ -85,12 +104,34 @@ export default {
             {
               label: 'Height vs Age',
               data,
-              backgroundColor: '#41B883'
+              backgroundColor: '#00D8FF'
             }
           ]
         }
       } catch (error) {
         console.error('Error fetching scatter data:', error)
+      }
+    },
+    async fetchHeightDistribution() {
+      try {
+        const response = await axios.get(`${this.baseURL}api/height-distribution`)
+        const apiData = response.data
+
+        const labels = Object.keys(apiData)
+        const data = Object.values(apiData)
+
+        this.barChartData = {
+          labels,
+          datasets: [
+            {
+              label: 'Player Height Distribution',
+              backgroundColor: '#41B883',
+              data
+            }
+          ]
+        }
+      } catch (error) {
+        console.error('Error fetching height distribution:', error)
       }
     }
   }
