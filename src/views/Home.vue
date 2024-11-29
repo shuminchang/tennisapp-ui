@@ -1,13 +1,18 @@
 <template>
-    <div id="app">
-      <AtpPlayerList />
+    <div id="app" style="text-align: center;">
       <div class="container">
+        <h1>ATP Player</h1>
         <div class="row">
           <div class="col-md-6">
-            <Chart />
+            <AtpPlayerList />
           </div>
           <div class="col-md-6">
-            <PlayerChart :baseURL="baseURL"/>
+            <div>
+              <Chart />
+            </div>
+            <div>
+              <PlayerChart :baseURL="baseURL"/>
+            </div>
           </div>
         </div>
       </div>
