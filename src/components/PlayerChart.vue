@@ -1,12 +1,15 @@
 <template>
-  <div class="col-4">
+  <div class="col-6 chart-container">
     <Pie v-if="chartData" :data="chartData" :options="options" />
   </div>
-  <div class="col-4">
+  <div class="col-6 chart-container">
     <Scatter v-if="scatterData" :data="scatterData" :options="scatterOptions" />
   </div>
-  <div class="col-4">
+  <div class="col-6 chart-container">
     <Bar v-if="barChartData" :data="barChartData" :options="barChartOptions" />
+  </div>
+  <div class="col-6 chart-container">
+    <Scatter v-if="clusterData" :data="clusterData" :options="clusterOptions" />
   </div>
 </template>
 
@@ -30,16 +33,17 @@ export default {
       chartData: null,
       scatterData: null,
       barChartData: null,
+      clusterData: null,
       options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
       },
       scatterOptions: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
           x: {
-            title: { display: true, text: 'Height (cm)' }
+            title: { display: true, text: 'Height (cm)' },
           },
           y: {
             title: { display: true, text: 'Age' }
@@ -59,12 +63,25 @@ export default {
           }
         }
       },
+      clusterOptions: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Age' }
+                },
+                y: {
+                    title: { display: true, text: 'Height (cm)' }
+                }
+            }
+        }
     }
   },
   mounted() {
     this.fetchChartData()
     this.fetchScatterData()
     this.fetchHeightDistribution()
+    this.fetchPlayerHeightAgeHandClusters(3)
   },
   methods: {
     async fetchChartData() {
@@ -133,7 +150,45 @@ export default {
       } catch (error) {
         console.error('Error fetching height distribution:', error)
       }
+    },
+    async fetchPlayerHeightAgeHandClusters(numClusters = 3) {
+        try {
+            const response = await axios.get(`${this.baseURL}api/player-height-age-hand-clusters`, {
+                params: { numClusters }
+            });
+            const apiData = response.data;
+
+            // Group data by cluster
+            const clusters = {};
+            apiData.forEach(item => {
+                const cluster = item.cluster;
+                if (!clusters[cluster]) {
+                    clusters[cluster] = { label: `Cluster ${cluster}`, data: [], backgroundColor: this.getRandomColor() };
+                }
+                clusters[cluster].data.push({ x: item.age, y: item.height });
+            });
+
+            this.clusterData = {
+                datasets: Object.values(clusters)
+            };
+        } catch (error) {
+            console.error('Error fetching player clusters:', error);
+        }
+    },
+    getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
   }
 }
 </script>
+<style>
+.chart-container {
+  margin: 20px 0;
+  min-height: 400px; /* Increase height for better visibility */
+}
+</style>
