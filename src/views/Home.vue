@@ -3,16 +3,11 @@
       <div class="container">
         <h1>ATP Player</h1>
         <div class="row">
-          <div class="col-md-6">
+          <PlayerChart :baseURL="baseURL"/>
+        </div>
+        <div class="row">
+          <div class="col-12">
             <AtpPlayerList />
-          </div>
-          <div class="col-md-6">
-            <div>
-              <Chart />
-            </div>
-            <div>
-              <PlayerChart :baseURL="baseURL"/>
-            </div>
           </div>
         </div>
       </div>
@@ -21,14 +16,14 @@
 
 <script>
 import AtpPlayerList from "./AtpPlayerList.vue";
-import Chart from '../components/Chart.vue';
+// import Chart from '../components/Chart.vue';
 import PlayerChart from '../components/PlayerChart.vue'
 
 export default {
   name: "HomeView",
   components: {
     AtpPlayerList,
-    Chart,
+    // Chart,
     PlayerChart
   },
   props : [ "baseURL"],

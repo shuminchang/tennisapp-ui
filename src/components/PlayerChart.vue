@@ -1,33 +1,51 @@
 <template>
-  <div>
+  <div class="col-6">
     <Pie v-if="chartData" :data="chartData" :options="options" />
+  </div>
+  <div class="col-6">
+    <Scatter v-if="scatterData" :data="scatterData" :options="scatterOptions" />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-import { Pie } from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale, PointElement, LineElement } from 'chart.js'
+import { Pie, Scatter } from 'vue-chartjs'
 
-ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, PointElement, LineElement)
 
 export default {
   name: 'PlayerChart',
   components: {
-    Pie
+    Pie,
+    Scatter
   },
   props : [ "baseURL"],
   data() {
     return {
       chartData: null,
+      scatterData: null,
       options: {
         responsive: true,
         maintainAspectRatio: false
+      },
+      scatterOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: { display: true, text: 'Height (cm)' }
+          },
+          y: {
+            title: { display: true, text: 'Age' }
+          }
+        }
       }
     }
   },
   mounted() {
     this.fetchChartData()
+    this.fetchScatterData()
   },
   methods: {
     async fetchChartData() {
@@ -50,6 +68,29 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching chart data:', error)
+      }
+    },
+    async fetchScatterData() {
+      try {
+        const response = await axios.get(`${this.baseURL}api/height-vs-age`)
+        const apiData = response.data
+
+        const data = apiData.map(item => ({
+          x: item.height,
+          y: item.age
+        }))
+
+        this.scatterData = {
+          datasets: [
+            {
+              label: 'Height vs Age',
+              data,
+              backgroundColor: '#41B883'
+            }
+          ]
+        }
+      } catch (error) {
+        console.error('Error fetching scatter data:', error)
       }
     }
   }
